@@ -1,0 +1,36 @@
+name: Backend Dev Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-backend:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync backend code to EC2 app directory
+        run: |
+          rsync -av --delete \
+            --exclude=node_modules \
+            --exclude=.env \
+            jagger-backend/ \
+            /home/ec2-user/jagger-dev/backend/
+
+      - name: Install dependencies
+        working-directory: /home/ec2-user/jagger-dev/backend
+        run: npm install
+
+      - name: Build backend (TypeScript)
+        working-directory: /home/ec2-user/jagger-dev/backend
+        run: npm run build
+
+      - name: Restart backend with PM2
+        working-directory: /home/ec2-user/jagger-dev/backend
+        run: |
+          pm2 restart jagger-backend || pm2 start ecosystem.config.js
+          pm2 save

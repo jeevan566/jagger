@@ -1,0 +1,31 @@
+name: Frontend Dev Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-frontend:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install frontend dependencies
+        working-directory: jagger-client
+        run: npm install
+
+      - name: Build frontend
+        working-directory: jagger-client
+        run: npm run build
+
+      - name: Deploy frontend to Nginx root
+        run: |
+          sudo rm -rf /var/www/jagger-client/*
+          sudo cp -r jagger-client/dist/* /var/www/jagger-client/
+
+      - name: Reload Nginx
+        run: sudo systemctl reload nginx
+        
