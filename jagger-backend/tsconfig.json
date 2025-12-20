@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+
+    "allowJs": true,
+    "checkJs": false,
+
+    "module": "nodenext",
+    "target": "esnext",
+    "moduleResolution": "nodenext",
+
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "strict": false,
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}
