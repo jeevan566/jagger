@@ -24,7 +24,7 @@ export default function Inventory() {
     };
 
     loadInventory();
-  }, [user?.role]); // ✅ correct dependency
+  }, [user?.role]);
 
   const refreshInventory = async () => {
     const res = await api.get("/inventory");
@@ -103,47 +103,25 @@ export default function Inventory() {
         </thead>
 
         <tbody>
-  {inventory.map((item) => (
-    <tr key={item._id}>
-      <td>
-        {item.productId ? item.productId.name : "Deleted Product"}
-      </td>
-
-      <td>{item.quantity}</td>
-
-      <td>{item.minStock}</td>
-
-      <td>
-        {item.quantity <= item.minStock ? (
-          <span className="badge bg-danger">Low</span>
-        ) : (
-          <span className="badge bg-success">OK</span>
-        )}
-      </td>
-    </tr>
-  ))}
-</tbody>
-        {/* <tbody>
-          {items.map((i) => (
-            <tr key={i._id}> */}
-              {/* <td>{i.productId.name}</td> */}
-              {/* <td>{item.productId?.name || "N/A"}</td>
-              <td>{i.quantity}</td>
-              <td>{i.minStock}</td>
+          {items.map((item) => (
+            <tr key={item._id}>
               <td>
-                {i.quantity === 0 && (
-                  <span className="badge bg-danger">Out</span>
-                )}
-                {i.quantity > 0 && i.quantity <= i.minStock && (
-                  <span className="badge bg-warning">Low</span>
-                )}
-                {i.quantity > i.minStock && (
-                  <span className="badge bg-success">In Stock</span>
+                {item.productId?.name || "Deleted Product"}
+              </td>
+
+              <td>{item.quantity}</td>
+              <td>{item.minStock}</td>
+
+              <td>
+                {item.quantity <= item.minStock ? (
+                  <span className="badge bg-danger">Low</span>
+                ) : (
+                  <span className="badge bg-success">OK</span>
                 )}
               </td>
             </tr>
           ))}
-        </tbody> */}
+        </tbody>
       </table>
     </div>
   );
