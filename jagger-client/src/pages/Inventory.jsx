@@ -102,7 +102,7 @@ export default function Inventory() {
           </tr>
         </thead>
 
-        <tbody>
+        {/* <tbody>
           {items.map((item) => (
             <tr key={item._id}>
               <td>
@@ -121,7 +121,29 @@ export default function Inventory() {
               </td>
             </tr>
           ))}
-        </tbody>
+        </tbody> */}
+        <tbody>
+  {items.map((item) => (
+    <tr key={item._id}>
+      <td>
+        {item.productId ? item.productId.name : "Deleted Product"}
+      </td>
+
+      <td>{item.quantity}</td>
+
+      <td>{item.minStock}</td>
+
+      <td>
+        {item.quantity <= item.minStock ? (
+          <span className="badge bg-danger">Low</span>
+        ) : (
+          <span className="badge bg-success">OK</span>
+        )}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
       </table>
     </div>
   );
