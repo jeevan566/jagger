@@ -173,18 +173,18 @@ exports.approvePO = async (req, res) => {
       return res.status(404).json({ message: "PO not found" });
     }
 
-    // ✅ Update inventory safely
+    // 🔥 FIXED INVENTORY UPDATE
     for (let item of po.items) {
-      const productId = item.productId._id || item.productId;
-
-      const inv = await Inventory.findOne({ productId });
+      const inv = await Inventory.findOne({
+        productId: item.productId._id,
+      });
 
       if (inv) {
         inv.quantity += item.quantity;
         await inv.save();
       } else {
         await Inventory.create({
-          productId,
+          productId: item.productId._id,
           quantity: item.quantity,
           minStock: 10,
         });
@@ -210,11 +210,13 @@ exports.approvePO = async (req, res) => {
       ]
     );
 
-    return res.json({ message: "PO Approved", po });
-
+    return res.json({
+      message: "PO Approved successfully",
+      po,
+    });
   } catch (err) {
     console.error("Approve PO Error:", err);
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
