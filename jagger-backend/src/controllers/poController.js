@@ -168,38 +168,39 @@ exports.approvePO = async (req, res) => {
     )
       .populate("supplierId")
       .populate("items.productId");
-for (let item of po.items) {
-  const productId = item.productId._id; // ✅ FIX
 
-  const inv = await Inventory.findOne({ productId });
+    if (!po) {
+      return res.status(404).json({ message: "PO not found" });
+    }
 
-  if (inv) {
-    inv.quantity += item.quantity;
-    await inv.save();
-  } else {
-    await Inventory.create({
-      productId,
-      quantity: item.quantity,
-      minStock: 10,
-    });
-  }
-}
+    // ✅ Update inventory safely
+    for (let item of po.items) {
+      const productId = item.productId._id || item.productId;
 
+      const inv = await Inventory.findOne({ productId });
 
-    if (!po) return res.status(404).json({ message: "PO not found" });
+      if (inv) {
+        inv.quantity += item.quantity;
+        await inv.save();
+      } else {
+        await Inventory.create({
+          productId,
+          quantity: item.quantity,
+          minStock: 10,
+        });
+      }
+    }
+
     logActivity(req.user.id, "PO_APPROVED", `PO: ${po.poNumber}`);
 
-    // Generate PDF after approval
     const pdfPath = await generatePOPDF(po);
 
-    // Email supplier after approval
-    sendEmail(
+    await sendEmail(
       po.supplierId.email,
       `PO Approved: ${po.poNumber}`,
       `
         <h2>Your Purchase Order is Approved</h2>
         <p>PO Number: <b>${po.poNumber}</b></p>
-        <p>Please find the attached PO PDF.</p>
       `,
       [
         {
@@ -209,8 +210,10 @@ for (let item of po.items) {
       ]
     );
 
-    return res.json({ message: "PO Approved and emailed to supplier", po });
+    return res.json({ message: "PO Approved", po });
+
   } catch (err) {
+    console.error("Approve PO Error:", err);
     res.status(500).json({ message: err.message });
   }
 };
