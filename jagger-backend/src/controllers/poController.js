@@ -168,20 +168,23 @@ exports.approvePO = async (req, res) => {
     )
       .populate("supplierId")
       .populate("items.productId");
-    for (let item of po.items) {
-      const inv = await Inventory.findOne({ productId: item.productId });
+for (let item of po.items) {
+  const productId = item.productId._id; // ✅ FIX
 
-      if (inv) {
-        inv.quantity += item.quantity;
-        await inv.save();
-      } else {
-        await Inventory.create({
-          productId: item.productId,
-          quantity: item.quantity,
-          minStock: 10,
-        });
-      }
-    }
+  const inv = await Inventory.findOne({ productId });
+
+  if (inv) {
+    inv.quantity += item.quantity;
+    await inv.save();
+  } else {
+    await Inventory.create({
+      productId,
+      quantity: item.quantity,
+      minStock: 10,
+    });
+  }
+}
+
 
     if (!po) return res.status(404).json({ message: "PO not found" });
     logActivity(req.user.id, "PO_APPROVED", `PO: ${po.poNumber}`);
