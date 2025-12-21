@@ -97,8 +97,7 @@ export default function Inventory() {
             <th>Status</th>
           </tr>
         </thead>
-
-  <tbody>
+<tbody>
   {items.map((item) => (
     <tr key={item._id}>
       <td>{item.productId?.name || "Deleted Product"}</td>
@@ -114,6 +113,7 @@ export default function Inventory() {
     </tr>
   ))}
 </tbody>
+
 
       </table>
     </div>
