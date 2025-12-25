@@ -5,113 +5,91 @@ const path = require("path");
 exports.generatePOPDF = (po) => {
   return new Promise((resolve, reject) => {
     try {
-      const pdfPath = path.join(
-        __dirname,
-        `../../generated/PO_${po.poNumber}.pdf`
-      );
+      const dir = path.join(__dirname, "../../generated");
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir);
 
-      if (!fs.existsSync(path.join(__dirname, "../../generated"))) {
-        fs.mkdirSync(path.join(__dirname, "../../generated"));
-      }
-
+      const pdfPath = path.join(dir, `PO_${po.poNumber}.pdf`);
       const doc = new PDFDocument({ margin: 50 });
       const stream = fs.createWriteStream(pdfPath);
       doc.pipe(stream);
 
-      // ===========================
-      // HEADER SECTION
-      // ===========================
+      // ================= HEADER =================
       doc
-        .image(path.join(__dirname, "../assets/logo.png"), 50, 40, { width: 80 })
+        .image(path.join(__dirname, "../assets/logo.png"), 50, 40, {
+          width: 80,
+        })
         .fontSize(20)
         .text("PURCHASE ORDER", 150, 50, { align: "left" });
 
       doc
         .fontSize(10)
-        .text("Your Company Name Pvt. Ltd.", 150, 80)
-        .text("123 Business Street", 150, 95)
-        .text("City, Country, ZIP", 150, 110)
+        .text("jeevan rai Pvt. Ltd.")
+        .text("Procurement Department")
         .moveDown(2);
 
-      // ===========================
-      // PO DETAILS SECTION
-      // ===========================
-      doc.fontSize(12).text(`PO Number: ${po.poNumber}`);
-      doc.text(`Date: ${new Date(po.createdAt).toLocaleDateString()}`).moveDown();
+      // ================= PO DETAILS =================
+      doc.fontSize(12);
+      doc.text(`PO Number: ${po.poNumber}`);
+      doc.text(`Date: ${new Date(po.createdAt).toLocaleDateString()}`);
+      doc.moveDown(1.5);
 
-      // ===========================
-      // SUPPLIER DETAILS SECTION
-      // ===========================
+      // ================= SUPPLIER =================
       doc.fontSize(14).text("Supplier Details", { underline: true });
-      doc
-        .fontSize(12)
-        .text(`Name: ${po.supplierId.name}`)
-        .text(`Email: ${po.supplierId.email}`)
-        .moveDown(2);
+      doc.moveDown(0.5);
 
-      // ===========================
-      // ITEMS TABLE HEADER
-      // ===========================
-      doc.fontSize(13).text("Order Items", { underline: true }).moveDown(0.5);
+      doc.fontSize(12);
+      doc.text(`Name: ${po.supplierId?.name || "N/A"}`);
+      doc.text(`Email: ${po.supplierId?.email || "N/A"}`);
+      doc.moveDown(2);
+
+      // ================= ITEMS TABLE =================
+      doc.fontSize(14).text("Order Items", { underline: true });
+      doc.moveDown(1);
 
       const tableTop = doc.y;
-      const col1 = 50;
-      const col2 = 220;
-      const col3 = 280;
-      const col4 = 340;
-      const col5 = 410;
+      const col = [50, 220, 280, 350, 430];
 
-      doc.fontSize(10);
-      doc.text("Product", col1, tableTop);
-      doc.text("Qty", col2, tableTop);
-      doc.text("Unit", col3, tableTop);
-      doc.text("Price", col4, tableTop);
-      doc.text("Total", col5, tableTop);
+      doc.fontSize(11);
+      doc.text("Product", col[0], tableTop);
+      doc.text("Qty", col[1], tableTop);
+      doc.text("Unit", col[2], tableTop);
+      doc.text("Price", col[3], tableTop);
+      doc.text("Total", col[4], tableTop);
 
-      doc.moveTo(col1, tableTop + 15)
+      doc
+        .moveTo(50, tableTop + 15)
         .lineTo(550, tableTop + 15)
         .stroke();
 
-      // ===========================
-      // TABLE ROWS
-      // ===========================
-      let yPos = tableTop + 25;
+      let y = tableTop + 25;
       let grandTotal = 0;
 
       po.items.forEach((item) => {
-        doc.text(item.productId.name, col1, yPos);
-        doc.text(item.quantity.toString(), col2, yPos);
-        doc.text(item.unit, col3, yPos);
-        doc.text(item.price.toFixed(2), col4, yPos);
-        doc.text(item.total.toFixed(2), col5, yPos);
+        doc.text(item.productId?.name || "N/A", col[0], y);
+        doc.text(item.quantity, col[1], y);
+        doc.text(item.unit || "-", col[2], y);
+        doc.text(item.price?.toFixed(2) || "0.00", col[3], y);
+        doc.text(item.total?.toFixed(2) || "0.00", col[4], y);
 
-        grandTotal += item.total;
-        yPos += 20;
+        grandTotal += item.total || 0;
+        y += 20;
       });
 
-      // ===========================
-      // TOTAL AMOUNT
-      // ===========================
-      doc.moveTo(50, yPos + 5).lineTo(550, yPos + 5).stroke();
-
+      doc.moveDown(2);
       doc.fontSize(12).text(`Grand Total: ₹${grandTotal.toFixed(2)}`, {
         align: "right",
       });
 
-      // ===========================
-      // NOTES SECTION
-      // ===========================
+      // ================= NOTES =================
       doc.moveDown(2);
       doc.fontSize(14).text("Notes", { underline: true });
-      doc.fontSize(11).text(po.notes || "N/A", { indent: 20 });
+      doc.fontSize(11).text(po.notes || "N/A");
 
-      // ===========================
-      // SIGNATURE SECTION
-      // ===========================
+      // ================= SIGNATURE =================
       doc.moveDown(3);
-      doc.fontSize(12).text("Authorized Signature:", 50);
+      doc.text("Authorized Signature");
       doc.moveDown(1);
-      doc.text("______________________________", 50);
+      doc.text("____________________________");
 
       doc.end();
 
