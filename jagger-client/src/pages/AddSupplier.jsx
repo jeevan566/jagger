@@ -1,82 +1,120 @@
 import { useState } from "react";
 import api from "../api/api";
-import { useNavigate } from "react-router-dom";
 
 export default function AddSupplier() {
-  const navigate = useNavigate();
-
   const [form, setForm] = useState({
     name: "",
     companyName: "",
     email: "",
+    password: "",
     phone: "",
-    address: "",
   });
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  const addSupplier = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    await api.post("/suppliers", form);
-    navigate("/suppliers");
+
+    try {
+      await api.post("/suppliers", form);
+      alert("✅ Supplier added successfully");
+
+      setForm({
+        name: "",
+        companyName: "",
+        email: "",
+        password: "",
+        phone: "",
+      });
+    } catch (err) {
+      alert(err.response?.data?.message || "Error adding supplier");
+    }
   };
 
   return (
-    <div className="card p-4 shadow" style={{ maxWidth: 500 }}>
-      <h3 className="mb-3">Add Supplier</h3>
+    <div className="container mt-4">
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          <div className="card shadow">
+            <div className="card-header bg-dark text-white">
+              <h5 className="mb-0">Add Supplier</h5>
+            </div>
 
-      <form onSubmit={addSupplier}>
-        <input
-          type="text"
-          className="form-control mb-3"
-          name="name"
-          placeholder="Contact Person Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
+            <div className="card-body">
+              <form onSubmit={submit}>
+                <div className="mb-3">
+                  <label className="form-label">Supplier Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-        <input
-          type="text"
-          className="form-control mb-3"
-          name="companyName"
-          placeholder="Company Name"
-          value={form.companyName}
-          onChange={handleChange}
-          required
-        />
+                <div className="mb-3">
+                  <label className="form-label">Company Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="companyName"
+                    value={form.companyName}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-        <input
-          type="email"
-          className="form-control mb-3"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
+                <div className="mb-3">
+                  <label className="form-label">Email</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-        <input
-          type="text"
-          className="form-control mb-3"
-          name="phone"
-          placeholder="Phone"
-          value={form.phone}
-          onChange={handleChange}
-        />
+                <div className="mb-3">
+                  <label className="form-label">Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-        <textarea
-          className="form-control mb-3"
-          name="address"
-          placeholder="Address"
-          rows="3"
-          value={form.address}
-          onChange={handleChange}
-        />
+                <div className="mb-3">
+                  <label className="form-label">Phone</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                  />
+                </div>
 
-        <button className="btn btn-primary w-100">Save Supplier</button>
-      </form>
+                <button type="submit" className="btn btn-primary w-100">
+                  Add Supplier
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <p className="text-muted text-center mt-3">
+            Supplier will be able to login using the provided email & password.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
