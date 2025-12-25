@@ -1,17 +1,19 @@
+
 const mongoose = require("mongoose");
 
 const supplierSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  companyName: { type: String, required: true },
-  email: { type: String, required: true },
-  phone: { type: String },
-  address: { type: String },
-  status: {
-    type: String,
-    enum: ["pending", "approved", "rejected"],
-    default: "pending",
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   },
-  createdAt: { type: Date, default: Date.now },
+  companyName: {
+    type: String,
+    required: true,
+  },
+  contactPerson: String,
+  phone: String,
+  address: String,
 });
 
 module.exports = mongoose.model("Supplier", supplierSchema);
