@@ -81,7 +81,6 @@ export default function AddUser() {
         >
           <option value="manager">Manager</option>
           <option value="supplier">Supplier</option>
-          <option value="admin">Admin</option>
         </select>
 
         <button className="btn btn-primary w-100">Create User</button>
