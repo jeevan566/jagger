@@ -39,7 +39,7 @@ export default function RFQs() {
               <td>{r.rfqNumber}</td>
               <td>{r.title}</td>
               <td>{r.status}</td>
-              <td>{r.suppliers.map((s) => s.companyName).join(", ")}</td>
+              <td>{r.suppliers.map((s) => s.name).join(", ")}</td>
               <td>
                 <Link to={`/rfq/${r._id}`} className="btn btn-sm btn-info">
                   View
