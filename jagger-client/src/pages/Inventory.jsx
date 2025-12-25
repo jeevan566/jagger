@@ -13,42 +13,45 @@ export default function Inventory() {
   const [minStock, setMinStock] = useState("");
 
   useEffect(() => {
-    loadInventory();
-    if (user?.role === "admin") loadProducts();
-  }, [user?.role]);
+    const loadInventory = async () => {
+      const res = await api.get("/inventory");
+      setItems(res.data);
 
-  const loadInventory = async () => {
+      if (user?.role === "admin") {
+        const p = await api.get("/products");
+        setProducts(p.data);
+      }
+    };
+
+    loadInventory();
+  }, [user?.role]); // ✅ correct dependency
+
+  const refreshInventory = async () => {
     const res = await api.get("/inventory");
     setItems(res.data);
   };
 
-  const loadProducts = async () => {
-    const res = await api.get("/products");
-    setProducts(res.data);
-  };
-
   const addInventory = async () => {
-    try {
-      await api.post("/inventory", {
-        productId,
-        quantity: Number(quantity),
-        minStock: Number(minStock),
-      });
+    await api.post("/inventory", {
+      productId,
+      quantity,
+      minStock,
+    });
 
-      alert("Inventory added");
-      setProductId("");
-      setQuantity("");
-      setMinStock("");
-      loadInventory();
-    } catch (err) {
-      alert(err.response?.data?.message || "Error adding inventory");
-    }
+    alert("Inventory added");
+
+    setProductId("");
+    setQuantity("");
+    setMinStock("");
+
+    refreshInventory();
   };
 
   return (
     <div>
       <h3>Inventory Management</h3>
 
+      {/* ADMIN ADD INVENTORY */}
       {user?.role === "admin" && (
         <div className="card p-3 mt-3">
           <h5>Add Inventory</h5>
@@ -88,6 +91,7 @@ export default function Inventory() {
         </div>
       )}
 
+      {/* INVENTORY TABLE */}
       <table className="table table-bordered mt-4">
         <thead className="table-dark">
           <tr>
@@ -97,24 +101,27 @@ export default function Inventory() {
             <th>Status</th>
           </tr>
         </thead>
-<tbody>
-  {items.map((item) => (
-    <tr key={item._id}>
-      <td>{item.productId?.name || "Deleted Product"}</td>
-      <td>{item.quantity}</td>
-      <td>{item.minStock}</td>
-      <td>
-        {item.quantity <= item.minStock ? (
-          <span className="badge bg-danger">Low</span>
-        ) : (
-          <span className="badge bg-success">OK</span>
-        )}
-      </td>
-    </tr>
-  ))}
-</tbody>
 
-
+        <tbody>
+          {items.map((i) => (
+            <tr key={i._id}>
+              <td>{i.productId.name}</td>
+              <td>{i.quantity}</td>
+              <td>{i.minStock}</td>
+              <td>
+                {i.quantity === 0 && (
+                  <span className="badge bg-danger">Out</span>
+                )}
+                {i.quantity > 0 && i.quantity <= i.minStock && (
+                  <span className="badge bg-warning">Low</span>
+                )}
+                {i.quantity > i.minStock && (
+                  <span className="badge bg-success">In Stock</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );
