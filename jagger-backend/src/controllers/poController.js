@@ -11,50 +11,101 @@ const Supplier = require("../models/Supplier");
 // CREATE PO (Status = Pending)
 // ============================
 
+// exports.createPO = async (req, res) => {
+//   try {
+//     const { supplierId, items, notes, rfqId } = req.body;
+
+//     const poNumber =
+//       "PO-" + ((await PO.countDocuments()) + 1).toString().padStart(4, "0");
+
+//     let po = await PO.create({
+//       poNumber,
+//       supplierId, // Supplier _id
+//       rfqId,
+//       items,
+//       notes,
+//       status: "pending",
+//     });
+
+//     // ✅ Populate correctly
+//     po = await PO.findById(po._id)
+//       .populate("supplierId") // Supplier
+//       .populate("items.productId", "name");
+
+//     if (!po.supplierId) {
+//       return res.status(404).json({ message: "Supplier not found" });
+//     }
+
+//     // ✅ Generate PDF
+//     const pdfPath = await generatePOPDF(po);
+
+//     // ✅ Email supplier
+//     await sendEmail(
+//       po.supplierId.email,
+//       `PO Pending Approval: ${po.poNumber}`,
+//       `
+//         <h2>Purchase Order Created</h2>
+//         <p><b>PO Number:</b> ${po.poNumber}</p>
+//         <p><b>Supplier:</b> ${po.supplierId.name}</p>
+//       `,
+//       [{ filename: `PO_${po.poNumber}.pdf`, path: pdfPath }]
+//     );
+
+//     // Notify managers
+//     const managers = await User.find({ role: "manager" });
+//     for (const m of managers) {
+//       createNotification(m._id, `PO ${po.poNumber} pending approval`);
+//     }
+
+//     res.json({ message: "PO created", po });
+//   } catch (err) {
+//     console.error("Create PO Error:", err);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 exports.createPO = async (req, res) => {
   try {
     const { supplierId, items, notes, rfqId } = req.body;
+
+    if (!supplierId || !items?.length) {
+      return res.status(400).json({ message: "Supplier and items required" });
+    }
+
+    const supplier = await Supplier.findById(supplierId);
+    if (!supplier) {
+      return res.status(404).json({ message: "Supplier not found" });
+    }
 
     const poNumber =
       "PO-" + ((await PO.countDocuments()) + 1).toString().padStart(4, "0");
 
     let po = await PO.create({
       poNumber,
-      supplierId, // Supplier _id
+      supplierId,
       rfqId,
       items,
       notes,
       status: "pending",
     });
 
-    // ✅ Populate correctly
     po = await PO.findById(po._id)
-      .populate("supplierId") // Supplier
+      .populate("supplierId")
       .populate("items.productId", "name");
 
-    if (!po.supplierId) {
-      return res.status(404).json({ message: "Supplier not found" });
+    let pdfPath;
+    try {
+      pdfPath = await generatePOPDF(po);
+    } catch (e) {
+      return res.status(500).json({ message: "PDF generation failed" });
     }
 
-    // ✅ Generate PDF
-    const pdfPath = await generatePOPDF(po);
-
-    // ✅ Email supplier
-    await sendEmail(
-      po.supplierId.email,
-      `PO Pending Approval: ${po.poNumber}`,
-      `
-        <h2>Purchase Order Created</h2>
-        <p><b>PO Number:</b> ${po.poNumber}</p>
-        <p><b>Supplier:</b> ${po.supplierId.name}</p>
-      `,
-      [{ filename: `PO_${po.poNumber}.pdf`, path: pdfPath }]
-    );
-
-    // Notify managers
-    const managers = await User.find({ role: "manager" });
-    for (const m of managers) {
-      createNotification(m._id, `PO ${po.poNumber} pending approval`);
+    if (supplier.email) {
+      await sendEmail(
+        supplier.email,
+        `PO Pending Approval: ${po.poNumber}`,
+        `<p>PO Number: <b>${po.poNumber}</b></p>`,
+        [{ filename: `PO_${po.poNumber}.pdf`, path: pdfPath }]
+      );
     }
 
     res.json({ message: "PO created", po });
