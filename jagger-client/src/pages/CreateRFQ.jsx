@@ -59,7 +59,7 @@ export default function CreateRFQ() {
               onChange={() => toggleSupplier(s._id)}
             />
             <label className="form-check-label">
-              {s.companyName} ({s.email})
+              {s.name} ({s.email})
             </label>
           </div>
         ))}
