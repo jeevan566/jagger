@@ -1,6 +1,7 @@
 const RFQ = require("../models/RFQ");
 const RFQItem = require("../models/RFQItem");
 const User = require("../models/User");
+const Supplier = require("../models/Supplier");
 const { sendEmail } = require("../utils/sendEmail");
 const { logActivity } = require("../utils/logActivity");
 const { createNotification } = require("../utils/createNotification");
@@ -156,7 +157,7 @@ exports.publishRFQ = async (req, res) => {
 
         // Email
         await sendEmail(
-          supplierUser.email,
+          Supplier.email,
           `New RFQ Assigned: ${rfq.rfqNumber}`,
           `
             <h2>New RFQ Assigned</h2>
