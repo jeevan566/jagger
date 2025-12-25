@@ -5,124 +5,65 @@ const { sendEmail } = require("../utils/sendEmail");
 const { logActivity } = require("../utils/logActivity");
 const { createNotification } = require("../utils/createNotification");
 const Inventory = require("../models/Inventory");
+const Supplier = require("../models/Supplier");
 
 // ============================
 // CREATE PO (Status = Pending)
 // ============================
-// exports.createPO = async (req, res) => {
-//   try {
-//     const { supplierId, items, notes, rfqId } = req.body;
 
-//     const count = await PO.countDocuments();
-//     const poNumber = "PO-" + (count + 1).toString().padStart(4, "0");
-
-//     const po = await PO.create({
-//       poNumber,
-//       supplierId,
-//       rfqId,
-//       items,
-//       notes,
-//       status: "pending",
-//     });
-
-//     // ✅ Fetch supplier user properly
-//     const supplier = await User.findById(supplierId);
-//     if (!supplier) {
-//       return res.status(404).json({ message: "Supplier not found" });
-//     }
-
-//     // ✅ Generate PDF
-//     const pdfPath = await generatePOPDF(po);
-
-//     // ✅ Email supplier
-//     await sendEmail(
-//       supplier.email,
-//       `PO Pending Approval: ${po.poNumber}`,
-//       `
-//         <h2>Purchase Order Created</h2>
-//         <p>PO Number: <b>${po.poNumber}</b></p>
-//         <p>Status: Pending Approval</p>
-//       `,
-//       [
-//         {
-//           filename: `PO_${po.poNumber}.pdf`,
-//           path: pdfPath,
-//         },
-//       ]
-//     );
-
-//     // ✅ Notify ALL managers
-//     const managers = await User.find({ role: "manager" });
-//     for (let manager of managers) {
-//       createNotification(
-//         manager._id,
-//         `PO ${po.poNumber} is pending approval`
-//       );
-//     }
-
-//     return res.json({
-//       message: "PO created (Pending Approval)",
-//       po,
-//     });
-
-//   } catch (err) {
-//     console.error("Create PO Error:", err);
-//     res.status(500).json({ message: err.message });
-//   }
-// };
 exports.createPO = async (req, res) => {
   try {
     const { supplierId, items, notes, rfqId } = req.body;
 
-    const count = await PO.countDocuments();
-    const poNumber = "PO-" + (count + 1).toString().padStart(4, "0");
+    const poNumber =
+      "PO-" + ((await PO.countDocuments()) + 1).toString().padStart(4, "0");
 
-    const po = await PO.create({
+    let po = await PO.create({
       poNumber,
-      supplierId,
+      supplierId, // Supplier _id
       rfqId,
       items,
       notes,
       status: "pending",
     });
 
-    const supplier = await User.findById(supplierId);
-    if (!supplier) {
+    // ✅ Populate correctly
+    po = await PO.findById(po._id)
+      .populate("supplierId") // Supplier
+      .populate("items.productId", "name");
+
+    if (!po.supplierId) {
       return res.status(404).json({ message: "Supplier not found" });
     }
 
-    // ⚠ SAFE PDF GENERATION
-    let pdfPath = null;
-    try {
-      pdfPath = await generatePOPDF(po);
-    } catch (pdfErr) {
-      console.warn("PDF generation skipped:", pdfErr.message);
-    }
+    // ✅ Generate PDF
+    const pdfPath = await generatePOPDF(po);
 
+    // ✅ Email supplier
     await sendEmail(
-      supplier.email,
+      po.supplierId.email,
       `PO Pending Approval: ${po.poNumber}`,
-      `<p>PO ${po.poNumber} created. Status: Pending.</p>`,
-      pdfPath
-        ? [{ filename: `PO_${po.poNumber}.pdf`, path: pdfPath }]
-        : []
+      `
+        <h2>Purchase Order Created</h2>
+        <p><b>PO Number:</b> ${po.poNumber}</p>
+        <p><b>Supplier:</b> ${po.supplierId.name}</p>
+      `,
+      [{ filename: `PO_${po.poNumber}.pdf`, path: pdfPath }]
     );
 
+    // Notify managers
     const managers = await User.find({ role: "manager" });
-    for (const manager of managers) {
-      await createNotification(
-        manager._id,
-        `PO ${po.poNumber} pending approval`
-      );
+    for (const m of managers) {
+      createNotification(m._id, `PO ${po.poNumber} pending approval`);
     }
 
-    return res.json({ message: "PO created", po });
-
+    res.json({ message: "PO created", po });
   } catch (err) {
     console.error("Create PO Error:", err);
-    return res.status(500).json({ message: "PO creation failed" });
+    res.status(500).json({ message: err.message });
   }
 };
+
 
 // ============================
 // GET PO LIST
@@ -168,39 +109,35 @@ exports.approvePO = async (req, res) => {
     )
       .populate("supplierId")
       .populate("items.productId");
-
-    if (!po) {
-      return res.status(404).json({ message: "PO not found" });
-    }
-
-    // 🔥 FIXED INVENTORY UPDATE
     for (let item of po.items) {
-      const inv = await Inventory.findOne({
-        productId: item.productId._id,
-      });
+      const inv = await Inventory.findOne({ productId: item.productId });
 
       if (inv) {
         inv.quantity += item.quantity;
         await inv.save();
       } else {
         await Inventory.create({
-          productId: item.productId._id,
+          productId: item.productId,
           quantity: item.quantity,
           minStock: 10,
         });
       }
     }
 
+    if (!po) return res.status(404).json({ message: "PO not found" });
     logActivity(req.user.id, "PO_APPROVED", `PO: ${po.poNumber}`);
 
+    // Generate PDF after approval
     const pdfPath = await generatePOPDF(po);
 
-    await sendEmail(
+    // Email supplier after approval
+    sendEmail(
       po.supplierId.email,
       `PO Approved: ${po.poNumber}`,
       `
         <h2>Your Purchase Order is Approved</h2>
         <p>PO Number: <b>${po.poNumber}</b></p>
+        <p>Please find the attached PO PDF.</p>
       `,
       [
         {
@@ -210,13 +147,9 @@ exports.approvePO = async (req, res) => {
       ]
     );
 
-    return res.json({
-      message: "PO Approved successfully",
-      po,
-    });
+    return res.json({ message: "PO Approved and emailed to supplier", po });
   } catch (err) {
-    console.error("Approve PO Error:", err);
-    return res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
