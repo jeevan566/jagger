@@ -14,12 +14,12 @@ exports.generatePOPDF = (po) => {
       doc.pipe(stream);
 
       // ================= HEADER =================
-      doc
-        .image(path.join(__dirname, "../assets/logo.png"), 50, 40, {
-          width: 80,
-        })
-        .fontSize(20)
-        .text("PURCHASE ORDER", 150, 50, { align: "left" });
+      // doc
+      //   .image(path.join(__dirname, "../assets/logo.png"), 50, 40, {
+      //     width: 80,
+      //   })
+      //   .fontSize(20)
+      //   .text("PURCHASE ORDER", 150, 50, { align: "left" });
 
       doc
         .fontSize(10)
