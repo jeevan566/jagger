@@ -1,15 +1,62 @@
 const Supplier = require("../models/Supplier");
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
 
 // CREATE SUPPLIER
+
 exports.createSupplier = async (req, res) => {
   try {
-    const supplier = new Supplier(req.body);
-    await supplier.save();
-    res.json({ message: "Supplier added successfully" });
+    const { name, email, password, companyName, phone } = req.body;
+
+    // 1️⃣ Create USER for login
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "supplier",
+    });
+
+    // 2️⃣ Create SUPPLIER business record
+    const supplier = await Supplier.create({
+      userId: user._id,
+      companyName,
+      phone,
+    });
+
+    res.json({
+      message: "Supplier created with login access",
+      supplier,
+      user,
+    });
   } catch (err) {
+    console.error("Create Supplier Error:", err);
     res.status(500).json({ message: err.message });
   }
 };
+
+
+
+// exports.createSupplier = async (req, res) => {
+//   const { name, companyName, email, password, phone } = req.body;
+
+//   const exists = await Supplier.findOne({ email });
+//   if (exists) {
+//     return res.status(400).json({ message: "Supplier already exists" });
+//   }
+
+//   const supplier = await Supplier.create({
+//     name,
+//     companyName,
+//     email,
+//     password, // 🔐 now stored securely
+//     phone,
+//   });
+
+//   res.json({ message: "Supplier created", supplier });
+// };
+
 
 // GET ALL SUPPLIERS
 exports.getSuppliers = async (req, res) => {
