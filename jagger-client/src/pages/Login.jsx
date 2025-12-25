@@ -30,7 +30,7 @@ export default function Login() {
       style={{ background: "#f4f6f8" }}
     >
       <div className="card p-4 shadow" style={{ width: "380px" }}>
-        <h3 className="text-center mb-1">JAGGAER Clone</h3>
+        <h3 className="text-center mb-1">E-Procurement System</h3>
         <p className="text-center text-muted mb-4" style={{ fontSize: "14px" }}>
           Strategic Sourcing & Procurement Platform
         </p>
@@ -82,10 +82,10 @@ export default function Login() {
         {/* About JAGGAER */}
         <div className="text-muted" style={{ fontSize: "12px" }}>
           <p className="mb-1">
-            <strong>About JAGGAER</strong>
+            <strong>About E-Procurement</strong>
           </p>
           <p className="mb-0">
-            JAGGAER is a leading procurement and sourcing platform that enables
+            E-Procurement is a leading procurement and sourcing platform that enables
             organizations to manage suppliers, RFQs, purchase orders, and
             inventory through a centralized digital workflow.
           </p>
