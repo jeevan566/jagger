@@ -63,55 +63,123 @@ const Supplier = require("../models/Supplier");
 //     res.status(500).json({ message: err.message });
 //   }
 // };
+const mongoose = require("mongoose");
+
 exports.createPO = async (req, res) => {
   try {
-    const { supplierId, items, notes, rfqId } = req.body;
+    console.log("CREATE PO BODY:", req.body);
 
-    if (!supplierId || !items?.length) {
-      return res.status(400).json({ message: "Supplier and items required" });
+    const { supplierId, items, notes = "", rfqId } = req.body;
+
+    // 1️⃣ Basic validation
+    if (!supplierId) {
+      return res.status(400).json({ message: "supplierId is required" });
     }
 
-    const supplier = await Supplier.findById(supplierId);
+    if (!mongoose.Types.ObjectId.isValid(supplierId)) {
+      return res.status(400).json({ message: "Invalid supplierId" });
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "PO items are required" });
+    }
+
+    // 2️⃣ Validate supplier exists
+    const supplier = await Supplier.findById(supplierId).lean();
     if (!supplier) {
       return res.status(404).json({ message: "Supplier not found" });
     }
 
-    const poNumber =
-      "PO-" + ((await PO.countDocuments()) + 1).toString().padStart(4, "0");
+    // 3️⃣ Validate items
+    for (const item of items) {
+      if (!item.productId || !mongoose.Types.ObjectId.isValid(item.productId)) {
+        return res.status(400).json({ message: "Invalid productId in items" });
+      }
 
+      if (!item.quantity || item.quantity <= 0) {
+        return res.status(400).json({ message: "Invalid quantity in items" });
+      }
+    }
+
+    // 4️⃣ Generate PO number (safe)
+    const count = await PO.countDocuments();
+    const poNumber = `PO-${String(count + 1).padStart(4, "0")}`;
+
+    // 5️⃣ Create PO
     let po = await PO.create({
       poNumber,
       supplierId,
-      rfqId,
+      rfqId: rfqId || null,
       items,
       notes,
       status: "pending",
     });
 
+    // 6️⃣ Populate safely
     po = await PO.findById(po._id)
-      .populate("supplierId")
+      .populate("supplierId", "name email")
       .populate("items.productId", "name");
 
-    let pdfPath;
+    if (!po) {
+      return res.status(500).json({ message: "Failed to load PO after creation" });
+    }
+
+    // 7️⃣ Generate PDF (SAFE)
+    let pdfPath = null;
     try {
       pdfPath = await generatePOPDF(po);
-    } catch (e) {
-      return res.status(500).json({ message: "PDF generation failed" });
+    } catch (pdfErr) {
+      console.error("PDF ERROR:", pdfErr);
+      return res.status(500).json({ message: "PO created but PDF failed" });
     }
 
-    if (supplier.email) {
-      await sendEmail(
-        supplier.email,
-        `PO Pending Approval: ${po.poNumber}`,
-        `<p>PO Number: <b>${po.poNumber}</b></p>`,
-        [{ filename: `PO_${po.poNumber}.pdf`, path: pdfPath }]
-      );
+    // 8️⃣ Email supplier (NON-BLOCKING)
+    if (po.supplierId?.email) {
+      try {
+        await sendEmail(
+          po.supplierId.email,
+          `PO Pending Approval: ${po.poNumber}`,
+          `
+            <h2>Purchase Order Created</h2>
+            <p><b>PO Number:</b> ${po.poNumber}</p>
+            <p><b>Supplier:</b> ${po.supplierId.name}</p>
+          `,
+          pdfPath
+            ? [{ filename: `PO_${po.poNumber}.pdf`, path: pdfPath }]
+            : []
+        );
+      } catch (emailErr) {
+        console.error("EMAIL ERROR:", emailErr);
+        // Do NOT fail PO creation
+      }
     }
 
-    res.json({ message: "PO created", po });
+    // 9️⃣ Notify managers (NON-BLOCKING)
+    const managers = await User.find({ role: "manager" }).select("_id");
+    for (const m of managers) {
+      try {
+        await createNotification(
+          m._id,
+          `PO ${po.poNumber} pending approval`
+        );
+      } catch (nErr) {
+        console.error("NOTIFICATION ERROR:", nErr);
+      }
+    }
+
+    // 🔟 SUCCESS
+    return res.status(201).json({
+      success: true,
+      message: "PO created successfully",
+      po,
+    });
+
   } catch (err) {
-    console.error("Create PO Error:", err);
-    res.status(500).json({ message: err.message });
+    console.error("CREATE PO FATAL ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
