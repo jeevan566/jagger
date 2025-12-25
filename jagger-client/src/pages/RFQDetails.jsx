@@ -59,7 +59,7 @@ export default function RFQDetails() {
       <ul>
         {rfq.suppliers.map((s) => (
           <li key={s._id}>
-            {s.companyName} ({s.email})
+            {s.name} ({s.email})
           </li>
         ))}
       </ul>
