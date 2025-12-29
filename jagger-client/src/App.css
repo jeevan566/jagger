@@ -1,8 +1,15 @@
-#root {
+/* #root {
   max-width: 1280px;
-  margin: 0 auto;
+  margin:0 auto;
   padding: 2rem;
   text-align: center;
+} */
+#root {
+  height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
 }
 
 .logo {
@@ -16,6 +23,14 @@
 }
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
+}
+.main-area {
+ margin-left: 260px;
+  width: calc(100% - 260px);
+  height: 100vh;          /* ✅ fixed height */
+  overflow-y: auto;      /* ✅ SCROLLS HERE */
+  background: #f8fafc;
+
 }
 
 @keyframes logo-spin {
@@ -46,45 +61,380 @@
 .layout-root {
   display: flex;
   height: 100vh;
-  overflow: hidden;
+  overflow: visible;
+}
+
+/* Layout */
+.layout-root {
+  min-height: 100vh;
 }
 
 /* Sidebar */
 .sidebar {
-  width: 250px;
-  background-color: #212529;
-  color: white;
+  width: 260px;
+  background: linear-gradient(180deg, #020617, #0f172a);
   padding: 20px;
+  height: 100vh;
+  overflow-y: auto;        /* ✅ allow scroll */
+  position: fixed;         /* ✅ lock sidebar */
+  left: 0;
+  top: 0;
+}
+
+/* Hide ugly scrollbar (optional but nice) */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+
+
+/* Title */
+.sidebar-title {
+  color: #fff;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Links */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #cbd5e1;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.sidebar-link:hover {
+  background: #1e293b;
+  color: #ffffff;
+}
+
+.sidebar-link.active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.sidebar-link i {
+  font-size: 18px;
+}
+
+/* Topbar */
+/* .topbar {
+  height: 60px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 20px;
+  display: fixed;
+  justify-content: space-between;
+  align-items: center;
+} */
+/* ===== TOPBAR ===== */
+.topbar {
   position: fixed;
   top: 0;
-  left: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-/* Main area */
-.main-area {
-  margin-left: 250px;
-  display: flex;
-  flex-direction: column;
-  width: calc(100% - 250px);
-  height: 100vh;
-}
-
-/* Top navbar */
-.topbar {
+  left: 260px;                     /* after sidebar */
+  right: 0;
   height: 60px;
-  background-color: #f8f9fa;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
   padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #ddd;
+  z-index: 900;
 }
 
-/* Content scroll area */
+/* Content */
 .content-area {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
+  padding: 24px;
+  margin-top: 60px;            /* topbar height */
+  min-height: calc(100vh - 60px);
+  padding-bottom:80px;        /* ✅ IMPORTANT: space for last button */
 }
+
+.table th {
+  font-weight: 600;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* KPI Cards */
+.kpi-card {
+  padding: 20px;
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-5px);
+}
+
+/* KPI Icon */
+.kpi-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+/* Chart Cards */
+.dashboard-card {
+  padding: 24px;
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* Notification wrapper */
+.notification-wrapper {
+  position: relative;
+}
+
+/* Bell */
+.notification-bell {
+  position: relative;
+  font-size: 22px;
+  cursor: pointer;
+  color: #374151;
+}
+
+.notification-bell:hover {
+  color: #2563eb;
+}
+
+/* Badge */
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #dc2626;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+/* Dropdown */
+.notification-dropdown {
+  position: absolute;
+  right: 0;
+  top: 36px;
+  width: 320px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+  z-index: 2000;
+  overflow: hidden;
+}
+
+/* Header */
+.dropdown-header {
+  padding: 12px 16px;
+  font-weight: 600;
+  background: #f1f5f9;
+}
+
+/* Empty */
+.dropdown-empty {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* List */
+.dropdown-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+/* Item */
+.dropdown-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dropdown-item:hover {
+  background: #f8fafc;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+/* ===== PAGE LAYOUT ===== */
+.page-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* ===== SETTINGS CARD ===== */
+.settings-card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== FORM ===== */
+.form-label {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+/* ===== LOGO ===== */
+.logo-preview {
+  width: 120px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  background: #f9fafb;
+}
+
+.table thead th {
+  font-weight: 600;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+}
+
+.modal-content {
+  border-radius: 14px;
+}
+
+.modal-header {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-footer {
+  border-top: 1px solid #e5e7eb;
+}
+.table td,
+.table th {
+  white-space: nowrap;
+}
+/* ===== LOGIN PAGE ===== */
+.login-wrapper {
+  display: flex;
+  height: 100vh;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* LEFT PANEL */
+.login-left {
+  flex: 1;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: white;
+  padding: 80px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-left h1 {
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.login-left .tagline {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 40px;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px 0;
+}
+
+.feature-list li {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.footer-text {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+/* RIGHT PANEL */
+.login-right {
+  flex: 1;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  width: 380px;
+  background: white;
+  padding: 36px;
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.login-card h3 {
+  font-weight: 700;
+}
+
+/* Register link */
+.register-link {
+  font-size: 14px;
+  text-decoration: none;
+  color: #2563eb;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .login-wrapper {
+    flex-direction: column;
+  }
+
+  .login-left {
+    display: none;
+  }
+
+  .login-right {
+    flex: 1;
+  }
+}
+
