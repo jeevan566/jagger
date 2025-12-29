@@ -43,49 +43,103 @@ export default function SubmitQuote() {
     navigate("/supplier-rfqs");
   };
 
+  // return (
+  //   <div>
+  //     <h3>Submit Quote</h3>
+
+  //     <table className="table table-bordered mt-3">
+  //       <thead className="table-dark">
+  //         <tr>
+  //           <th>Product</th>
+  //           <th>Qty</th>
+  //           <th>Unit</th>
+  //           <th>Your Price</th>
+  //         </tr>
+  //       </thead>
+
+  //       <tbody>
+  //         {items.map((i, idx) => (
+  //           <tr key={i._id}>
+  //             <td>{i.productId.name}</td>
+  //             <td>{i.quantity}</td>
+  //             <td>{i.unit}</td>
+  //             <td>
+  //               <input
+  //                 type="number"
+  //                 className="form-control"
+  //                 onChange={(e) => updatePrice(idx, e.target.value)}
+  //                 required
+  //               />
+  //             </td>
+  //           </tr>
+  //         ))}
+  //       </tbody>
+  //     </table>
+
+  //     <textarea
+  //       className="form-control mt-3"
+  //       placeholder="Notes (optional)"
+  //       value={note}
+  //       onChange={(e) => setNote(e.target.value)}
+  //     />
+
+  //     <button className="btn btn-success mt-3" onClick={submit}>
+  //       Submit Quote
+  //     </button>
+  //   </div>
+  // );
   return (
-    <div>
-      <h3>Submit Quote</h3>
+    <div className="page-wrapper">
+      <h3 className="page-title">Submit Quote</h3>
 
-      <table className="table table-bordered mt-3">
-        <thead className="table-dark">
-          <tr>
-            <th>Product</th>
-            <th>Qty</th>
-            <th>Unit</th>
-            <th>Your Price</th>
-          </tr>
-        </thead>
+      <div className="settings-card">
+        <div className="table-responsive">
+          <table className="table table-hover align-middle">
+            <thead className="table-light">
+              <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th>Your Price</th>
+              </tr>
+            </thead>
 
-        <tbody>
-          {items.map((i, idx) => (
-            <tr key={i._id}>
-              <td>{i.productId.name}</td>
-              <td>{i.quantity}</td>
-              <td>{i.unit}</td>
-              <td>
-                <input
-                  type="number"
-                  className="form-control"
-                  onChange={(e) => updatePrice(idx, e.target.value)}
-                  required
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            <tbody>
+              {items.map((i, idx) => (
+                <tr key={i._id}>
+                  <td>{i.productId.name}</td>
+                  <td>{i.quantity}</td>
+                  <td>{i.unit}</td>
+                  <td style={{ maxWidth: "160px" }}>
+                    <input
+                      type="number"
+                      className="form-control"
+                      onChange={(e) => updatePrice(idx, e.target.value)}
+                      required
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      <textarea
-        className="form-control mt-3"
-        placeholder="Notes (optional)"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-      />
+        <div className="mt-3">
+          <label className="form-label">Notes (optional)</label>
+          <textarea
+            className="form-control"
+            rows="3"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+        </div>
 
-      <button className="btn btn-success mt-3" onClick={submit}>
-        Submit Quote
-      </button>
+        <div className="text-end mt-4">
+          <button className="btn btn-success px-4" onClick={submit}>
+            Submit Quote
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

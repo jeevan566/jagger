@@ -32,40 +32,103 @@ export default function CreateRFQ() {
     navigate(`/rfq/${res.data._id}`);
   };
 
+  // return (
+  //   <div className="card p-4 shadow">
+  //     <h3>Create RFQ</h3>
+
+  //     <form onSubmit={createRFQ}>
+  //       <input
+  //         className="form-control mb-3"
+  //         placeholder="RFQ Title"
+  //         onChange={(e) => setForm({ ...form, title: e.target.value })}
+  //         required
+  //       />
+
+  //       <textarea
+  //         className="form-control mb-3"
+  //         placeholder="Notes"
+  //         onChange={(e) => setForm({ ...form, notes: e.target.value })}
+  //       />
+
+  //       <h5>Select Suppliers</h5>
+  //       {suppliers.map((s) => (
+  //         <div key={s._id} className="form-check">
+  //           <input
+  //             type="checkbox"
+  //             className="form-check-input"
+  //             onChange={() => toggleSupplier(s._id)}
+  //           />
+  //           <label className="form-check-label">
+  //             {s.name} ({s.email})
+  //           </label>
+  //         </div>
+  //       ))}
+
+  //       <button className="btn btn-primary mt-3">Create RFQ</button>
+  //     </form>
+  //   </div>
+  // );
   return (
-    <div className="card p-4 shadow">
-      <h3>Create RFQ</h3>
+    <div className="page-wrapper">
+      <h3 className="page-title">Create RFQ</h3>
 
-      <form onSubmit={createRFQ}>
-        <input
-          className="form-control mb-3"
-          placeholder="RFQ Title"
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-          required
-        />
-
-        <textarea
-          className="form-control mb-3"
-          placeholder="Notes"
-          onChange={(e) => setForm({ ...form, notes: e.target.value })}
-        />
-
-        <h5>Select Suppliers</h5>
-        {suppliers.map((s) => (
-          <div key={s._id} className="form-check">
+      <div
+        className="settings-card"
+        style={{ maxWidth: "800px", margin: "0 auto" }}
+      >
+        <form onSubmit={createRFQ}>
+          {/* Title */}
+          <div className="mb-3">
+            <label className="form-label">RFQ Title</label>
             <input
-              type="checkbox"
-              className="form-check-input"
-              onChange={() => toggleSupplier(s._id)}
+              className="form-control"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              required
             />
-            <label className="form-check-label">
-              {s.name} ({s.email})
-            </label>
           </div>
-        ))}
 
-        <button className="btn btn-primary mt-3">Create RFQ</button>
-      </form>
+          {/* Notes */}
+          <div className="mb-3">
+            <label className="form-label">Notes</label>
+            <textarea
+              className="form-control"
+              rows="3"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
+          </div>
+
+          {/* Suppliers */}
+          <div className="mb-3">
+            <label className="form-label">Select Suppliers</label>
+
+            <div
+              className="border rounded p-3"
+              style={{ maxHeight: "250px", overflowY: "auto" }}
+            >
+              {suppliers.map((s) => (
+                <div key={s._id} className="form-check">
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    checked={selected.includes(s._id)}
+                    onChange={() => toggleSupplier(s._id)}
+                  />
+                  <label className="form-check-label">
+                    {s.name} ({s.email})
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Submit */}
+          <div className="text-end mt-4">
+            <button className="btn btn-primary px-4">Create RFQ</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

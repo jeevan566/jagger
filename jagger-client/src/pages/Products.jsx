@@ -23,43 +23,96 @@ export default function Products() {
     setProducts(res.data);
   };
 
+  // return (
+  //   <div>
+  //     <div className="d-flex justify-content-between align-items-center mb-3">
+  //       <h3>Products</h3>
+  //       <Link to="/add-product" className="btn btn-primary">Add Product</Link>
+  //     </div>
+
+  //     <table className="table table-bordered">
+  //       <thead className="table-dark">
+  //         <tr>
+  //           <th>Name</th>
+  //           <th>Category</th>
+  //           <th>Unit</th>
+  //           <th>Base Price</th>
+  //           <th width="150">Actions</th>
+  //         </tr>
+  //       </thead>
+
+  //       <tbody>
+  //         {products.map((p) => (
+  //           <tr key={p._id}>
+  //             <td>{p.name}</td>
+  //             <td>{p?.categoryId?.name}</td>
+  //             <td>{p.unit}</td>
+  //             <td>{p.basePrice}</td>
+  //             <td>
+  //               <button
+  //                 className="btn btn-danger btn-sm"
+  //                 onClick={() => deleteProduct(p._id)}
+  //               >
+  //                 Delete
+  //               </button>
+  //             </td>
+  //           </tr>
+  //         ))}
+  //       </tbody>
+  //     </table>
+  //   </div>
+  // );
   return (
-    <div>
+    <div className="page-wrapper">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3>Products</h3>
-        <Link to="/add-product" className="btn btn-primary">Add Product</Link>
+        <h3 className="page-title mb-0">Products</h3>
+        <Link to="/add-product" className="btn btn-primary">
+          + Add Product
+        </Link>
       </div>
 
-      <table className="table table-bordered">
-        <thead className="table-dark">
-          <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Unit</th>
-            <th>Base Price</th>
-            <th width="150">Actions</th>
-          </tr>
-        </thead>
+      <div className="settings-card">
+        <div className="table-responsive">
+          <table className="table table-hover align-middle">
+            <thead className="table-light">
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Unit</th>
+                <th>Base Price</th>
+                <th style={{ width: "150px" }}>Actions</th>
+              </tr>
+            </thead>
 
-        <tbody>
-          {products.map((p) => (
-            <tr key={p._id}>
-              <td>{p.name}</td>
-              <td>{p?.categoryId?.name}</td>
-              <td>{p.unit}</td>
-              <td>{p.basePrice}</td>
-              <td>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => deleteProduct(p._id)}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            <tbody>
+              {products.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="text-center text-muted py-4">
+                    No products found
+                  </td>
+                </tr>
+              ) : (
+                products.map((p) => (
+                  <tr key={p._id}>
+                    <td>{p.name}</td>
+                    <td>{p?.categoryId?.name || "-"}</td>
+                    <td>{p.unit}</td>
+                    <td>{p.basePrice}</td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => deleteProduct(p._id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

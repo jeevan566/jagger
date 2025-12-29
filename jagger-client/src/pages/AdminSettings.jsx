@@ -43,57 +43,136 @@ export default function AdminSettings() {
     setSettings(updated.data);
   };
 
+  // return (
+  //   <div>
+  //     <h3>Admin Settings</h3>
+
+  //     <div className="card p-3 mt-3">
+  //       <label>Company Name</label>
+  //       <input
+  //         className="form-control"
+  //         value={companyName}
+  //         onChange={(e) => setCompanyName(e.target.value)}
+  //       />
+
+  //       <label className="mt-3">Company Address</label>
+  //       <textarea
+  //         className="form-control"
+  //         value={companyAddress}
+  //         onChange={(e) => setCompanyAddress(e.target.value)}
+  //       />
+
+  //       <label className="mt-3">Company Email</label>
+  //       <input
+  //         className="form-control"
+  //         value={companyEmail}
+  //         onChange={(e) => setCompanyEmail(e.target.value)}
+  //       />
+
+  //       <label className="mt-3">Terms (for PO PDF)</label>
+  //       <textarea
+  //         className="form-control"
+  //         value={terms}
+  //         onChange={(e) => setTerms(e.target.value)}
+  //       />
+
+  //       <label className="mt-3">Company Logo</label>
+  //       <input
+  //         type="file"
+  //         className="form-control"
+  //         onChange={(e) => setLogo(e.target.files[0])}
+  //       />
+
+  //       {settings.logo && (
+  //         <img
+  //           src={`http://localhost:5000/${settings.logo}`}
+  //           alt="Logo"
+  //           style={{ width: "120px", marginTop: "10px" }}
+  //         />
+  //       )}
+
+  //       <button className="btn btn-primary mt-3" onClick={saveSettings}>
+  //         Save Settings
+  //       </button>
+  //     </div>
+  //   </div>
+  // );
   return (
-    <div>
-      <h3>Admin Settings</h3>
+    <div className="page-wrapper">
+      <h3 className="page-title">Admin Settings</h3>
 
-      <div className="card p-3 mt-3">
-        <label>Company Name</label>
-        <input
-          className="form-control"
-          value={companyName}
-          onChange={(e) => setCompanyName(e.target.value)}
-        />
+      <div className="settings-card mb-5">
+        <div className="row g-4">
+          {/* Company Name */}
+          <div className="col-md-6">
+            <label className="form-label">Company Name</label>
+            <input
+              className="form-control"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+            />
+          </div>
 
-        <label className="mt-3">Company Address</label>
-        <textarea
-          className="form-control"
-          value={companyAddress}
-          onChange={(e) => setCompanyAddress(e.target.value)}
-        />
+          {/* Company Email */}
+          <div className="col-md-6">
+            <label className="form-label">Company Email</label>
+            <input
+              className="form-control"
+              value={companyEmail}
+              onChange={(e) => setCompanyEmail(e.target.value)}
+            />
+          </div>
 
-        <label className="mt-3">Company Email</label>
-        <input
-          className="form-control"
-          value={companyEmail}
-          onChange={(e) => setCompanyEmail(e.target.value)}
-        />
+          {/* Address */}
+          <div className="col-md-12">
+            <label className="form-label">Company Address</label>
+            <textarea
+              rows="3"
+              className="form-control"
+              value={companyAddress}
+              onChange={(e) => setCompanyAddress(e.target.value)}
+            />
+          </div>
 
-        <label className="mt-3">Terms (for PO PDF)</label>
-        <textarea
-          className="form-control"
-          value={terms}
-          onChange={(e) => setTerms(e.target.value)}
-        />
+          {/* Terms */}
+          <div className="col-md-12">
+            <label className="form-label">Terms (for PO PDF)</label>
+            <textarea
+              rows="4"
+              className="form-control"
+              value={terms}
+              onChange={(e) => setTerms(e.target.value)}
+            />
+          </div>
 
-        <label className="mt-3">Company Logo</label>
-        <input
-          type="file"
-          className="form-control"
-          onChange={(e) => setLogo(e.target.files[0])}
-        />
+          {/* Logo Upload */}
+          <div className="col-md-6">
+            <label className="form-label">Company Logo</label>
+            <input
+              type="file"
+              className="form-control"
+              onChange={(e) => setLogo(e.target.files[0])}
+            />
+          </div>
 
-        {settings.logo && (
-          <img
-            src={`http://localhost:5000/${settings.logo}`}
-            alt="Logo"
-            style={{ width: "120px", marginTop: "10px" }}
-          />
-        )}
+          {/* Logo Preview */}
+          <div className="col-md-6 d-flex align-items-end">
+            {settings.logo && (
+              <img
+                src={`http://localhost:5000/${settings.logo}`}
+                alt="Logo"
+                className="logo-preview"
+              />
+            )}
+          </div>
+        </div>
 
-        <button className="btn btn-primary mt-3" onClick={saveSettings}>
-          Save Settings
-        </button>
+        {/* Save Button */}
+        <div className="text-end mt-4">
+          <button className="btn btn-primary px-4" onClick={saveSettings}>
+            Save Settings
+          </button>
+        </div>
       </div>
     </div>
   );
