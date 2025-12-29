@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../api/api";
 
 export default function Notifications() {
   const [notes, setNotes] = useState([]);
   const [open, setOpen] = useState(false);
-  const dropdownRef = useRef(null);
 
   const loadNotes = async () => {
     const res = await api.get("/notifications");
@@ -13,66 +12,62 @@ export default function Notifications() {
 
   useEffect(() => {
     loadNotes();
-
-    // Close dropdown on outside click
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const unreadCount = notes.filter((n) => !n.isRead).length;
 
   const markRead = async () => {
-    if (unreadCount > 0) {
-      await api.put("/notifications/read");
-      loadNotes();
-    }
+    await api.put("/notifications/read");
+    loadNotes();
   };
 
   return (
-    <div className="notification-wrapper" ref={dropdownRef}>
-      {/* Bell */}
-      <div
-        className="notification-bell"
+    <div className="position-relative">
+      {/* Bell Icon */}
+      <span
+        style={{ cursor: "pointer", fontSize: "20px" }}
         onClick={() => {
           setOpen(!open);
           markRead();
         }}
       >
-        <i className="bi bi-bell"></i>
+        🔔
+      </span>
 
-        {unreadCount > 0 && (
-          <span className="notification-badge">{unreadCount}</span>
-        )}
-      </div>
+      {/* Badge */}
+      {unreadCount > 0 && (
+        <span
+          className="badge bg-danger"
+          style={{ position: "absolute", top: "-5px", right: "-10px" }}
+        >
+          {unreadCount}
+        </span>
+      )}
 
       {/* Dropdown */}
       {open && (
-        <div className="notification-dropdown">
-          <div className="dropdown-header">
-            Notifications
-          </div>
-
+        <div
+          className="card p-2"
+          style={{
+            position: "absolute",
+            right: 0,
+            top: "30px",
+            width: "250px",
+            zIndex: 1000,
+          }}
+        >
           {notes.length === 0 ? (
-            <div className="dropdown-empty">
-              No notifications
-            </div>
+            <p className="text-center text-muted">No notifications</p>
           ) : (
-            <div className="dropdown-list">
-              {notes.map((note) => (
-                <div key={note._id} className="dropdown-item">
-                  <p className="mb-1">{note.message}</p>
-                  <small className="text-muted">
-                    {new Date(note.createdAt).toLocaleString()}
-                  </small>
-                </div>
-              ))}
-            </div>
+            notes.map((note) => (
+              <div key={note._id} className="border-bottom p-2">
+                {note.message}
+                <br />
+                <small className="text-muted">
+                  {new Date(note.createdAt).toLocaleString()}
+                </small>
+              </div>
+            ))
           )}
         </div>
       )}
