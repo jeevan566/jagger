@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const Inventory = require("../models/Inventory"); // ✅ ADDED
 
 exports.createProduct = async (req, res) => {
   try {
@@ -30,19 +31,37 @@ exports.getProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true
-    });
+    const updated = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
+// ✅ DELETE PRODUCT + CASCADE DELETE INVENTORY
 exports.deleteProduct = async (req, res) => {
   try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: "Product deleted" });
+    const { id } = req.params;
+
+    // 1️⃣ Check product exists
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // 2️⃣ Delete related inventory (🔥 FIX)
+    await Inventory.deleteMany({ productId: id });
+
+    // 3️⃣ Delete product
+    await Product.findByIdAndDelete(id);
+
+    res.json({
+      message: "Product and related inventory deleted successfully",
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
