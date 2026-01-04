@@ -205,7 +205,7 @@ export default function Inventory() {
               ) : (
                 items.map((i) => (
                   <tr key={i._id}>
-                    <td>{i.productId.name}</td>
+                    <td>{i.productId.name || "null"}</td>
                     <td>{i.quantity}</td>
                     <td>{i.minStock}</td>
                     <td>
