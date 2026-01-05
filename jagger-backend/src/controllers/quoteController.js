@@ -38,13 +38,13 @@ exports.getRFQItems = async (req, res) => {
 };
 
 // Submit quote
+
 // exports.submitQuote = async (req, res) => {
 //   try {
 //     const supplierId = req.user.id;
 //     const rfqId = req.params.id;
 //     const { items, notes } = req.body;
 
-//     // 1. Create Quote
 //     const quote = await Quote.create({
 //       rfqId,
 //       supplierId,
@@ -54,48 +54,58 @@ exports.getRFQItems = async (req, res) => {
 //       submittedAt: new Date(),
 //     });
 
-//     // 2. Log activity
 //     await logActivity(supplierId, "QUOTE_SUBMITTED", `RFQ: ${rfqId}`);
 
-//     // 3. Notify all admins
+//     // ✅ FIX: get supplier details properly
+//     const supplier = await User.findById(supplierId).select("name email");
+//     const supplierName = supplier?.name || supplier?.email || "Supplier";
+
 //     const admins = await User.find({ role: "admin" });
 
 //     for (let admin of admins) {
-//       // In-app notification
 //       await createNotification(
 //         admin._id,
-//         `New quote submitted by ${req.user.name}`
+//         `New quote submitted by ${supplierName}`
 //       );
 
-//       // Email notification
 //       await sendEmail(
 //         admin.email,
 //         "Supplier Submitted a Quote",
 //         `
-//           <h2>A supplier has submitted a quote</h2>
+//           <h2>New Quote Submitted</h2>
 //           <p><strong>RFQ ID:</strong> ${rfqId}</p>
-//           <p><strong>Supplier:</strong> ${req.user.name}</p>
+//           <p><strong>Supplier:</strong> ${supplierName}</p>
 //           <p>Please login to review and compare quotes.</p>
 //         `
 //       );
 //     }
 
-//     // 4. Send response LAST
-//     res.json({
-//       message: "Quote submitted successfully",
-//       quote,
-//     });
+//     res.json({ message: "Quote submitted successfully", quote });
 //   } catch (err) {
 //     console.error("Submit Quote Error:", err);
 //     res.status(500).json({ message: err.message });
 //   }
 // };
+// Submit quote (SUPPLIER CAN SUBMIT ONLY ONCE PER RFQ)
 exports.submitQuote = async (req, res) => {
   try {
     const supplierId = req.user.id;
     const rfqId = req.params.id;
     const { items, notes } = req.body;
 
+    // 🔒 NEW FIX: Check if supplier already submitted a quote for this RFQ
+    const existingQuote = await Quote.findOne({
+      rfqId,
+      supplierId,
+    });
+
+    if (existingQuote) {
+      return res.status(400).json({
+        message: "You have already submitted a quote for this RFQ",
+      });
+    }
+
+    // ✅ Allow first-time submission
     const quote = await Quote.create({
       rfqId,
       supplierId,
@@ -107,7 +117,7 @@ exports.submitQuote = async (req, res) => {
 
     await logActivity(supplierId, "QUOTE_SUBMITTED", `RFQ: ${rfqId}`);
 
-    // ✅ FIX: get supplier details properly
+    // Get supplier details
     const supplier = await User.findById(supplierId).select("name email");
     const supplierName = supplier?.name || supplier?.email || "Supplier";
 
@@ -163,6 +173,20 @@ exports.getQuotesForRFQ = async (req, res) => {
     );
 
     res.json({ quotes, rfqItems });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Check if supplier already submitted quote for RFQ
+exports.checkQuoteSubmitted = async (req, res) => {
+  try {
+    const supplierId = req.user.id;
+    const rfqId = req.params.id;
+
+    const exists = await Quote.exists({ rfqId, supplierId });
+
+    res.json({ submitted: !!exists });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
