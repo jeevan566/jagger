@@ -1,22 +1,74 @@
-for local frontend setup :
+# 🚀 Production Deployment Project – Live Web Application
 
-opne new terminal 
-cd in the client folder
-run command npm install for installing node modules
-and for running the frontend command is npm run dev
+A full-stack **production-ready web application** deployed on a live server, demonstrating real-world backend, frontend, database, and deployment practices.
 
-for local backend setup 
+🌐 **Live URL:** https://16.16.158.217/
 
-opne new terminal 
-cd in the backend folder
-run command npm install for installing node modules
-and for running the backend command is npm run dev
+---
+
+## 📌 Project Overview
+
+This project represents an end-to-end **real-world deployment** of a modern web application, covering development, API integration, authentication, database operations, and production hosting with HTTPS.
+
+---
+
+## ✨ Key Features
+
+- RESTful backend APIs  
+- Modern frontend UI  
+- JWT-based authentication  
+- Role-based access control  
+- Inventory / RFQ / POS style modules  
+- PDF generation and email notifications  
+- Secure production deployment (HTTPS)  
+- Proper error handling and validations  
+
+---
+
+## 🛠 Tech Stack
+
+### Backend
+- Node.js  
+- Express.js  
+- MongoDB  
+- JWT Authentication  
+
+### Frontend
+- React  
+- Axios  
+- Bootstrap / CSS  
+
+### Deployment & Infrastructure
+- Nginx (Reverse Proxy)  
+- PM2 (Process Manager)  
+- HTTPS / SSL  
+- Linux-based cloud server  
+
+---
+
+## 🌐 Application URLs
+
+| Service | URL |
+|------|----|
+| Web Application | https://16.16.158.217/ |
+---
+
+## ⚙️ Local Setup Instructions
+
+### 1️⃣ Clone Repository
+```bash
+git clone 
+cd project-folder
+
+## frontend
+1.cd jagger-client
+2. NPM install
+3. npm run dev
+
+##backend
+1.cd jagger-backend
+2.npm install
+3.npm run dev
 
 
-for automations running check
-i have put one folder named jobs in backend go in that edit 
-cron.js as it is fixed on the 24 hr auto run to every 15 sec run
 
-for live server : https://16.16.158.217
-id : admin@gmail.com
-password : 123456
